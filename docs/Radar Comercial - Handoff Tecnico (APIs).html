@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Radar Comercial — Handoff Técnico de Integração de APIs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --orange:#EA5333; --orange-soft:#FCE9E3; --teal:#1E4249; --teal-soft:#E7EEEF;
+    --ink:#16202a; --muted:#5d6b78; --faint:#8b97a3; --line:#e5e9ee; --line2:#eef1f5;
+    --bg:#f6f7f9; --card:#ffffff; --code-bg:#0f1620; --code-tx:#d6dde6;
+    --ok:#1f8a5b; --warn:#b9770a; --warn-bg:#fdf4e3;
+    --sans:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:232px 1fr;gap:40px;}
+  a{color:var(--orange);}
+
+  /* header */
+  header.top{grid-column:1/-1;display:flex;align-items:center;gap:18px;padding:30px 0 18px;border-bottom:2px solid var(--teal);margin-bottom:36px;}
+  header.top img{height:34px;}
+  header.top .ht{flex:1;}
+  header.top .ht h1{margin:0;font-size:21px;font-weight:600;letter-spacing:-.01em;}
+  header.top .ht .sub{color:var(--muted);font-size:13.5px;margin-top:3px;}
+  header.top .meta{font-family:var(--mono);font-size:11.5px;color:var(--faint);text-align:right;line-height:1.7;}
+
+  /* TOC */
+  nav.toc{position:sticky;top:24px;align-self:start;font-size:13px;max-height:calc(100vh - 48px);overflow:auto;}
+  nav.toc .lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:0 0 10px;}
+  nav.toc ol{list-style:none;margin:0;padding:0;counter-reset:s;}
+  nav.toc li{counter-increment:s;margin:2px 0;}
+  nav.toc a{display:block;color:var(--muted);text-decoration:none;padding:5px 9px;border-radius:7px;border-left:2px solid transparent;}
+  nav.toc a:hover{background:var(--card);color:var(--ink);}
+  nav.toc a::before{content:counter(s) ". ";color:var(--orange);font-family:var(--mono);font-size:11px;}
+
+  main{min-width:0;padding-bottom:80px;}
+  section{margin-bottom:44px;scroll-margin-top:24px;}
+  h2{font-size:20px;font-weight:600;letter-spacing:-.01em;margin:0 0 6px;padding-top:8px;display:flex;align-items:baseline;gap:11px;}
+  h2 .n{font-family:var(--mono);font-size:13px;color:var(--orange);font-weight:600;}
+  h2 + .lead{color:var(--muted);font-size:14.5px;margin:0 0 20px;}
+  h3{font-size:15.5px;font-weight:600;margin:26px 0 10px;color:var(--teal);}
+  p{margin:0 0 13px;}
+  ul,ol{margin:0 0 14px;padding-left:22px;}
+  li{margin:5px 0;}
+  strong{font-weight:600;}
+  code{font-family:var(--mono);font-size:12.5px;background:var(--teal-soft);color:var(--teal);padding:1px 6px;border-radius:5px;}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin:16px 0;}
+  .callout{display:flex;gap:13px;background:var(--warn-bg);border:1px solid #f0dcae;border-radius:12px;padding:14px 16px;margin:16px 0;font-size:13.5px;color:#6b5418;}
+  .callout.ok{background:#eaf7f0;border-color:#bfe6d2;color:#1d5e41;}
+  .callout.info{background:var(--teal-soft);border-color:#cfe0e2;color:#234850;}
+  .callout .ic{font-size:17px;line-height:1.3;}
+
+  pre{background:var(--code-bg);color:var(--code-tx);border-radius:12px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.65;margin:14px 0;}
+  pre .c{color:#7f8b99;}
+  pre .k{color:#e0987a;}
+  pre .s{color:#8fc7a0;}
+
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+  th{background:var(--teal);color:#fff;text-align:left;padding:11px 14px;font-weight:600;font-size:12px;letter-spacing:.02em;}
+  td{padding:11px 14px;border-top:1px solid var(--line2);vertical-align:top;}
+  td.api{font-weight:600;white-space:nowrap;}
+  .pill{display:inline-block;font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:20px;font-weight:500;}
+  .pill.free{background:#eaf7f0;color:var(--ok);}
+  .pill.paid{background:var(--orange-soft);color:var(--orange);}
+  .pill.freemium{background:var(--warn-bg);color:var(--warn);}
+  .pill.cors{background:#e8eefb;color:#3258c4;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .kv{font-size:13px;}
+  .kv .k{font-family:var(--mono);font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;}
+  .kv .v{margin-top:2px;}
+
+  .flow{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin:18px 0;}
+  .flow .step{flex:1;min-width:150px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px;position:relative;}
+  .flow .step .sn{font-family:var(--mono);font-size:11px;color:var(--orange);}
+  .flow .step .st{font-weight:600;font-size:13.5px;margin:3px 0;}
+  .flow .step .sd{font-size:12px;color:var(--muted);}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:6px 0 0;}
+  footer{grid-column:1/-1;border-top:1px solid var(--line);padding:22px 0 50px;color:var(--faint);font-size:12.5px;}
+
+  @media print{
+    body{background:#fff;font-size:11.5px;}
+    .wrap{grid-template-columns:1fr;gap:0;max-width:none;}
+    nav.toc{display:none;}
+    pre,table,.card,.callout,.flow .step{break-inside:avoid;}
+    a{color:var(--ink);text-decoration:none;}
+    header.top{padding-top:0;}
+  }
+  @media(max-width:880px){ .wrap{grid-template-columns:1fr;} nav.toc{display:none;} .grid2{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <img src="logo-vendamais.png" alt="VendaMais" />
+    <div class="ht">
+      <h1>Radar Comercial — Handoff Técnico de Integração</h1>
+      <div class="sub">Como conectar APIs reais para validar sinais de inteligência comercial (Agente 3 → 6)</div>
+    </div>
+    <div class="meta">DOC. TÉCNICO · v1.0<br/>VendaMais · Radar Comercial<br/>Público-alvo: Dev / Eng.</div>
+  </header>
+
+  <nav class="toc">
+    <div class="lab">Conteúdo</div>
+    <ol>
+      <li><a href="#vis">Visão geral</a></li>
+      <li><a href="#arq">Arquitetura proposta</a></li>
+      <li><a href="#agentes">Agentes como serviços</a></li>
+      <li><a href="#apis">APIs por tipo de sinal</a></li>
+      <li><a href="#ia">Camada de IA (Claude)</a></li>
+      <li><a href="#dados">Modelo de dados</a></li>
+      <li><a href="#contrato">Contrato de API (app ↔ backend)</a></li>
+      <li><a href="#pipeline">Pipeline do Agente 3</a></li>
+      <li><a href="#veracidade">Veracidade & verificação</a></li>
+      <li><a href="#seg">Segurança & LGPD</a></li>
+      <li><a href="#custos">Custos estimados</a></li>
+      <li><a href="#roadmap">Roadmap de implementação</a></li>
+      <li><a href="#stack">Stack sugerida</a></li>
+      <li><a href="#riscos">Riscos & limitações</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section id="vis">
+      <h2><span class="n">01</span> Visão geral</h2>
+      <p class="lead">O que precisa ser construído para sair do protótipo (sinais "a verificar") para sinais validados com fonte real.</p>
+      <p>O <strong>Radar Comercial</strong> monitora empresas-alvo (hoje importadas de planilha) e, para cada uma, deve cruzar <strong>sinais externos públicos</strong> com a <strong>memória comercial</strong> e gerar priorização + abordagem. O protótipo atual roda 100% no navegador: a IA (Claude Haiku) já produz a <em>análise</em> e as <em>buscas a fazer</em>, mas <strong>não executa a varredura da web</strong> — por limitação de CORS, ausência de servidor e de chaves de API seguras.</p>
+      <p>Este documento especifica a <strong>camada de backend</strong> que executa o <em>Agente 3 (Radar externo)</em> de verdade: consulta as fontes, normaliza os sinais, registra a <strong>URL da fonte + data de captura</strong> e devolve ao app sinais com status <code>verificado</code> em vez de <code>a_verificar</code>.</p>
+      <div class="callout info"><span class="ic">◆</span><div><strong>Princípio inegociável (veracidade):</strong> todo sinal persistido deve carregar <code>fonte</code>, <code>url</code> e <code>capturado_em</code>. Nada entra como "fato" sem origem rastreável. Sinais inferidos por IA ficam como <code>a_verificar</code> até confirmação por fonte.</div></div>
+    </section>
+
+    <section id="arq">
+      <h2><span class="n">02</span> Arquitetura proposta</h2>
+      <p class="lead">Frontend (este app) ↔ Backend (API + workers) ↔ Fontes externas ↔ Banco.</p>
+      <div class="flow">
+        <div class="step"><div class="sn">CLIENTE</div><div class="st">App Radar (web)</div><div class="sd">Importa planilha, dispara rastreio, exibe sinais validados e abordagem.</div></div>
+        <div class="step"><div class="sn">API</div><div class="st">Backend / Gateway</div><div class="sd">REST + autenticação. Recebe pedidos do app, enfileira jobs, serve dados.</div></div>
+        <div class="step"><div class="sn">WORKERS</div><div class="st">Agentes (fila + cron)</div><div class="sd">Agentes 1–6 como jobs assíncronos. Rate-limit por fonte.</div></div>
+        <div class="step"><div class="sn">FONTES</div><div class="st">APIs externas</div><div class="sd">Notícias, vagas, LinkedIn, CNPJ, IA. Cada uma com adapter próprio.</div></div>
+        <div class="step"><div class="sn">DADOS</div><div class="st">PostgreSQL + cache</div><div class="sd">Empresas, contatos, sinais, rastreios, validações, auditoria.</div></div>
+      </div>
+      <p>O frontend <strong>nunca</strong> chama as APIs externas diretamente (chaves expostas + CORS). Ele fala só com o <strong>seu</strong> backend. O backend guarda as chaves, respeita os limites de cada fonte, normaliza e deduplica, e expõe um contrato estável (seção 7).</p>
+      <h3>Por que assíncrono (fila + worker)</h3>
+      <p>Rastrear 67+ contas em várias fontes leva tempo e esbarra em rate-limits. O fluxo correto: o app dispara <code>POST /rastreios</code> → backend cria um <code>job</code> e responde na hora com um <code>job_id</code> → o app acompanha o progresso por <code>GET /rastreios/:id</code> (ou WebSocket/SSE) e alimenta o medidor de progresso que já existe na tela.</p>
+    </section>
+
+    <section id="agentes">
+      <h2><span class="n">03</span> Agentes como serviços</h2>
+      <p class="lead">Mapeamento direto dos 6 agentes do projeto para módulos de backend.</p>
+      <table>
+        <thead><tr><th>Agente</th><th>Vira</th><th>Fontes / Ferramentas</th><th>Saída</th></tr></thead>
+        <tbody>
+          <tr><td class="api">1 · Cadastro &amp; enriquecimento</td><td>Serviço de ingestão + enriquecimento</td><td>BrasilAPI/CNPJá (CNPJ), Clearbit/Apollo (firmográfico)</td><td>Ficha padronizada + campos faltantes</td></tr>
+          <tr><td class="api">2 · Memória comercial</td><td>Importador de CRM/arquivos + indexação</td><td>Upload (XLSX/CSV/PDF), CRM (Bitrix/HubSpot API)</td><td>Resumo executivo + linha do tempo</td></tr>
+          <tr><td class="api">3 · Radar externo</td><td>Coletor de sinais (workers)</td><td>Notícias, vagas, LinkedIn, dados cadastrais</td><td>Sinais c/ fonte + url + relevância</td></tr>
+          <tr><td class="api">4 · Inteligência de intenção</td><td>Serviço de scoring (LLM)</td><td>Claude/OpenAI sobre sinais+memória</td><td>Score 0–100 + leitura</td></tr>
+          <tr><td class="api">5 · Estratégia de abordagem</td><td>Serviço de geração (LLM)</td><td>Claude/OpenAI</td><td>Mensagem, canal, perguntas, próximo passo</td></tr>
+          <tr><td class="api">6 · Priorizador diário</td><td>Job agendado (cron)</td><td>Banco (ordena por score)</td><td>Ranking diário</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="apis">
+      <h2><span class="n">04</span> APIs por tipo de sinal</h2>
+      <p class="lead">Quais contratar, o que fazem, custo, autenticação e observações de uso.</p>
+      <div class="legend">
+        <span><span class="pill free">grátis</span> sem custo (com limites)</span>
+        <span><span class="pill freemium">freemium</span> grátis limitado + planos pagos</span>
+        <span><span class="pill paid">pago</span> requer assinatura/créditos</span>
+        <span><span class="pill cors">CORS</span> pode ser chamada do navegador</span>
+      </div>
+
+      <h3>a) Dados cadastrais (CNPJ, filiais, sócios, capital social, CNAE)</h3>
+      <p>A fonte <strong>mais confiável e barata</strong> — dados oficiais da Receita Federal. Cobre os sinais "nova filial", "alteração cadastral", "capital social", "mudança societária".</p>
+      <table>
+        <thead><tr><th>API</th><th>Link</th><th>Custo</th><th>Observações</th></tr></thead>
+        <tbody>
+          <tr><td class="api">BrasilAPI</td><td><a href="https://brasilapi.com.br/docs#tag/CNPJ">brasilapi.com.br</a></td><td><span class="pill free">grátis</span> <span class="pill cors">CORS</span></td><td>Consulta por número de CNPJ. <code>GET /api/cnpj/v1/{cnpj}</code>. Open-source, sem chave.</td></tr>
+          <tr><td class="api">CNPJá</td><td><a href="https://cnpja.com/api">cnpja.com</a></td><td><span class="pill freemium">freemium</span></td><td>Dados enriquecidos + <strong>busca por nome/filtros</strong> e monitor de alterações. Ideal p/ o sinal "mudança cadastral".</td></tr>
+          <tr><td class="api">ReceitaWS</td><td><a href="https://receitaws.com.br/api">receitaws.com.br</a></td><td><span class="pill freemium">freemium</span></td><td>Simples, por CNPJ. Limite baixo no grátis (≈3/min).</td></tr>
+          <tr><td class="api">Casa dos Dados</td><td><a href="https://casadosdados.com.br">casadosdados.com.br</a></td><td><span class="pill paid">pago</span></td><td>Busca avançada de empresas por nome, CNAE, região. Bom p/ descobrir CNPJ a partir do nome.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout"><span class="ic">▲</span><div><strong>Dependência:</strong> a planilha do usuário veio <strong>sem CNPJ</strong>. O Agente 1 precisa primeiro resolver o CNPJ a partir do nome+UF (via CNPJá / Casa dos Dados) para depois monitorar alterações.</div></div>
+
+      <h3>b) Notícias (releases, prêmios, aportes, expansões)</h3>
+      <table>
+        <thead><tr><th>API</th><th>Link</th><th>Custo</th><th>Observações</th></tr></thead>
+        <tbody>
+          <tr><td class="api">GNews</td><td><a href="https://gnews.io/docs/">gnews.io</a></td><td><span class="pill freemium">freemium</span></td><td>Suporta <code>lang=pt</code> &amp; <code>country=br</code>. 100 req/dia no grátis.</td></tr>
+          <tr><td class="api">NewsAPI</td><td><a href="https://newsapi.org/docs">newsapi.org</a></td><td><span class="pill freemium">freemium</span></td><td>Grátis só p/ dev (não comercial). Bom p/ protótipo.</td></tr>
+          <tr><td class="api">SerpAPI (Google News)</td><td><a href="https://serpapi.com/google-news-api">serpapi.com</a></td><td><span class="pill paid">pago</span></td><td>Resultados do Google News, alta cobertura BR. 100 buscas/mês grátis.</td></tr>
+          <tr><td class="api">Bing News Search</td><td><a href="https://www.microsoft.com/en-us/bing/apis/bing-news-search-api">microsoft.com/bing/apis</a></td><td><span class="pill paid">pago</span></td><td>Atenção: Microsoft está descontinuando as Bing Search APIs — avaliar antes de adotar.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>c) Vagas (sinal de crescimento comercial: SDR, vendedor, gerente)</h3>
+      <table>
+        <thead><tr><th>API</th><th>Link</th><th>Custo</th><th>Observações</th></tr></thead>
+        <tbody>
+          <tr><td class="api">SerpAPI (Google Jobs)</td><td><a href="https://serpapi.com/google-jobs-api">serpapi.com/google-jobs-api</a></td><td><span class="pill paid">pago</span></td><td><strong>Recomendado:</strong> agrega vagas de vários boards (inclui LinkedIn/Indeed/Gupy via Google). Busca por empresa + termo.</td></tr>
+          <tr><td class="api">InfoJobs Brasil</td><td><a href="https://developer.infojobs.com.br/">developer.infojobs.com.br</a></td><td><span class="pill freemium">freemium</span></td><td>API oficial de um board BR. Cobertura parcial.</td></tr>
+          <tr><td class="api">Proxycurl (LinkedIn Jobs)</td><td><a href="https://nubela.co/proxycurl">nubela.co/proxycurl</a></td><td><span class="pill paid">pago</span></td><td>Vagas e dados de empresa do LinkedIn via API legalizada (créditos).</td></tr>
+        </tbody>
+      </table>
+      <div class="callout"><span class="ic">▲</span><div>Gupy e Catho <strong>não têm API pública oficial</strong>. Evite scraping direto (vide ToS). Use o agregador (SerpAPI Google Jobs) ou provedores legalizados.</div></div>
+
+      <h3>d) LinkedIn (novos executivos, contratações, crescimento de time)</h3>
+      <table>
+        <thead><tr><th>API</th><th>Link</th><th>Custo</th><th>Observações</th></tr></thead>
+        <tbody>
+          <tr><td class="api">Proxycurl</td><td><a href="https://nubela.co/proxycurl">nubela.co/proxycurl</a></td><td><span class="pill paid">pago</span></td><td>Perfis, empresas, headcount, mudanças de cargo. O mais usado p/ "movimentação executiva".</td></tr>
+          <tr><td class="api">People Data Labs</td><td><a href="https://www.peopledatalabs.com/">peopledatalabs.com</a></td><td><span class="pill paid">pago</span></td><td>Enriquecimento de pessoas/empresas em escala.</td></tr>
+          <tr><td class="api">Apollo.io</td><td><a href="https://apolloapi.com/">apollo.io</a></td><td><span class="pill paid">pago</span></td><td>Dados B2B + sinais de intenção + contatos. Forte p/ vendas.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout"><span class="ic">▲</span><div><strong>LinkedIn é o mais sensível.</strong> A API oficial do LinkedIn é restrita a parceiros. Use <strong>provedores autorizados</strong> (acima) e respeite os Termos. Não faça scraping direto do site.</div></div>
+
+      <h3>e) Enriquecimento firmográfico (porte, receita, setor, tecnologias)</h3>
+      <table>
+        <thead><tr><th>API</th><th>Link</th><th>Custo</th><th>Observações</th></tr></thead>
+        <tbody>
+          <tr><td class="api">Clearbit</td><td><a href="https://clearbit.com/">clearbit.com</a></td><td><span class="pill paid">pago</span></td><td>Enriquecimento por domínio. Bom p/ completar a ficha (Agente 1).</td></tr>
+          <tr><td class="api">Apollo.io</td><td><a href="https://apolloapi.com/">apollo.io</a></td><td><span class="pill paid">pago</span></td><td>Firmográfico + contatos + intent data.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="ia">
+      <h2><span class="n">05</span> Camada de IA (Agentes 4 e 5)</h2>
+      <p class="lead">A IA interpreta os sinais coletados e gera score + abordagem. Pode também <em>buscar na web</em> se rodar no servidor.</p>
+      <table>
+        <thead><tr><th>API</th><th>Link</th><th>Uso</th></tr></thead>
+        <tbody>
+          <tr><td class="api">Anthropic Claude</td><td><a href="https://docs.anthropic.com/">docs.anthropic.com</a></td><td>Interpretação de sinais (intenção), geração de abordagem. <strong>Web Search Tool</strong> permite a IA pesquisar e <strong>citar fontes reais</strong> server-side.</td></tr>
+          <tr><td class="api">Claude Web Search</td><td><a href="https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool">docs · web-search-tool</a></td><td>Ferramenta nativa: a IA executa buscas e retorna citações com URL. Caminho mais direto p/ sinais "verificados por IA".</td></tr>
+          <tr><td class="api">OpenAI</td><td><a href="https://platform.openai.com/docs">platform.openai.com</a></td><td>Alternativa para scoring/geração.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout ok"><span class="ic">✓</span><div><strong>Atalho poderoso:</strong> rodando o Agente 3+4 no servidor com <strong>Claude + Web Search Tool</strong>, a própria IA pesquisa, lê e cita a fonte. O sinal já nasce com URL → status <code>verificado</code>. Isso reduz a necessidade de integrar manualmente cada API de notícia/busca.</div></div>
+    </section>
+
+    <section id="dados">
+      <h2><span class="n">06</span> Modelo de dados</h2>
+      <p class="lead">Esquema relacional mínimo (PostgreSQL). O <strong>elo é sempre a empresa</strong>.</p>
+<pre><span class="c">-- empresas: o elo central</span>
+<span class="k">CREATE TABLE</span> empresas (
+  id            uuid <span class="k">PRIMARY KEY</span> <span class="k">DEFAULT</span> gen_random_uuid(),
+  nome          text <span class="k">NOT NULL</span>,
+  cnpj          text,                 <span class="c">-- resolvido pelo Agente 1</span>
+  segmento      text, cidade text, uf text,
+  site          text, linkedin text, porte text,
+  score         int <span class="k">DEFAULT</span> 0,         <span class="c">-- 0-100, calc. Agente 4</span>
+  origem        text,                 <span class="c">-- planilha | manual | api</span>
+  proveniencia  jsonb,                <span class="c">-- {tipo, arquivo, linha}</span>
+  validacao     text <span class="k">DEFAULT</span> <span class="s">'pendente'</span>, <span class="c">-- pendente|validado|incorreto</span>
+  ultimo_rastreio timestamptz,
+  criado_em     timestamptz <span class="k">DEFAULT</span> now(),
+  <span class="k">UNIQUE</span>(nome, uf)              <span class="c">-- upsert por nome+UF (não duplica)</span>
+);
+
+<span class="c">-- contatos da conta</span>
+<span class="k">CREATE TABLE</span> contatos (
+  id uuid <span class="k">PRIMARY KEY</span> <span class="k">DEFAULT</span> gen_random_uuid(),
+  empresa_id uuid <span class="k">REFERENCES</span> empresas(id) <span class="k">ON DELETE CASCADE</span>,
+  nome text, cargo text, email text, telefone text
+);
+
+<span class="c">-- sinais: SEMPRE com fonte rastreável</span>
+<span class="k">CREATE TABLE</span> sinais (
+  id uuid <span class="k">PRIMARY KEY</span> <span class="k">DEFAULT</span> gen_random_uuid(),
+  empresa_id uuid <span class="k">REFERENCES</span> empresas(id) <span class="k">ON DELETE CASCADE</span>,
+  tipo text,            <span class="c">-- expansao|crescimento_comercial|investimento|...</span>
+  titulo text,
+  resumo text,
+  fonte text,           <span class="c">-- 'Google News' | 'BrasilAPI' | 'Proxycurl'...</span>
+  url text,             <span class="c">-- link da fonte original (obrigatório p/ verificado)</span>
+  relevancia int,       <span class="c">-- 0-100</span>
+  status text <span class="k">DEFAULT</span> <span class="s">'a_verificar'</span>, <span class="c">-- a_verificar|verificado|descartado</span>
+  hash text <span class="k">UNIQUE</span>,     <span class="c">-- dedupe (empresa+tipo+url normalizada)</span>
+  capturado_em timestamptz <span class="k">DEFAULT</span> now()
+);
+
+<span class="c">-- rastreios: cada execução do Agente 3 (job)</span>
+<span class="k">CREATE TABLE</span> rastreios (
+  id uuid <span class="k">PRIMARY KEY</span> <span class="k">DEFAULT</span> gen_random_uuid(),
+  escopo text,          <span class="c">-- 'empresa' | 'todas'</span>
+  empresa_id uuid,
+  status text,          <span class="c">-- na_fila|rodando|concluido|erro</span>
+  progresso int <span class="k">DEFAULT</span> 0, <span class="c">-- 0-100 p/ o medidor</span>
+  total int, processadas int,
+  iniciado_em timestamptz <span class="k">DEFAULT</span> now(), terminado_em timestamptz
+);
+
+<span class="c">-- auditoria de validação humana</span>
+<span class="k">CREATE TABLE</span> validacoes (
+  id uuid <span class="k">PRIMARY KEY</span> <span class="k">DEFAULT</span> gen_random_uuid(),
+  alvo text, alvo_id uuid,  <span class="c">-- 'empresa' | 'sinal'</span>
+  status text, usuario text, em timestamptz <span class="k">DEFAULT</span> now()
+);</pre>
+    </section>
+
+    <section id="contrato">
+      <h2><span class="n">07</span> Contrato de API (app ↔ backend)</h2>
+      <p class="lead">Endpoints REST que o frontend já está pronto para consumir (espelham os objetos do protótipo).</p>
+<pre><span class="k">POST</span>   /v1/empresas/import      <span class="c">-- envia linhas da planilha → upsert por nome+UF</span>
+<span class="k">GET</span>    /v1/empresas             <span class="c">-- lista paginada (?page=&q=&origem=&validacao=)</span>
+<span class="k">GET</span>    /v1/empresas/:id         <span class="c">-- ficha + contato + sinais + memória</span>
+<span class="k">PATCH</span>  /v1/empresas/:id         <span class="c">-- validar/marcar incorreta</span>
+<span class="k">DELETE</span> /v1/empresas/:id
+
+<span class="k">POST</span>   /v1/rastreios            <span class="c">-- body {escopo:'todas'|'empresa', empresa_id?}</span>
+                                <span class="c">-- responde {job_id} na hora (assíncrono)</span>
+<span class="k">GET</span>    /v1/rastreios/:id        <span class="c">-- {status, progresso, processadas, total}</span>
+                                <span class="c">-- (ou SSE/WebSocket p/ o medidor em tempo real)</span>
+
+<span class="k">PATCH</span>  /v1/sinais/:id           <span class="c">-- {status:'verificado'|'descartado'}</span>
+<span class="k">GET</span>    /v1/export/radar         <span class="c">-- briefing do dia (txt/json)</span>
+<span class="k">GET</span>    /v1/export/empresa/:id   <span class="c">-- abordagem p/ o vendedor</span></pre>
+      <h3>Exemplo — resposta de um sinal validado</h3>
+<pre>{
+  <span class="s">"id"</span>: <span class="s">"a1b2…"</span>,
+  <span class="s">"tipo"</span>: <span class="s">"crescimento_comercial"</span>,
+  <span class="s">"titulo"</span>: <span class="s">"Vaga de Gerente Comercial aberta"</span>,
+  <span class="s">"fonte"</span>: <span class="s">"Google Jobs (SerpAPI)"</span>,
+  <span class="s">"url"</span>: <span class="s">"https://www.linkedin.com/jobs/view/…"</span>,
+  <span class="s">"relevancia"</span>: 86,
+  <span class="s">"status"</span>: <span class="s">"verificado"</span>,
+  <span class="s">"capturado_em"</span>: <span class="s">"2026-06-04T09:12:00Z"</span>
+}</pre>
+    </section>
+
+    <section id="pipeline">
+      <h2><span class="n">08</span> Pipeline do Agente 3 (coletor)</h2>
+      <p class="lead">Pseudo-código do worker que roda por empresa.</p>
+<pre><span class="k">async function</span> rastrearEmpresa(empresa, rastreio) {
+  <span class="k">const</span> sinais = [];
+
+  <span class="c">// 1. Garante CNPJ (Agente 1) se faltar</span>
+  <span class="k">if</span> (!empresa.cnpj) empresa.cnpj = <span class="k">await</span> resolverCnpj(empresa.nome, empresa.uf);
+
+  <span class="c">// 2. Consulta cada fonte em paralelo (com timeout + rate-limit)</span>
+  <span class="k">const</span> [cadastral, noticias, vagas, pessoas] = <span class="k">await</span> Promise.allSettled([
+    brasilApi.alteracoes(empresa.cnpj),          <span class="c">// filiais, capital, sócios</span>
+    news.buscar(empresa.nome, { lang:<span class="s">'pt'</span>, country:<span class="s">'br'</span> }),
+    jobs.buscar(empresa.nome, [<span class="s">'SDR'</span>,<span class="s">'vendedor'</span>,<span class="s">'gerente comercial'</span>]),
+    linkedin.mudancasExecutivas(empresa.nome),
+  ]);
+
+  <span class="c">// 3. Normaliza → {tipo,titulo,resumo,fonte,url,relevancia}</span>
+  sinais.push(...normalizar(cadastral, noticias, vagas, pessoas));
+
+  <span class="c">// 4. Dedupe por hash(empresa+tipo+url) e filtra ruído</span>
+  <span class="k">const</span> novos = dedupe(sinais).filter(s => s.relevancia >= 40);
+
+  <span class="c">// 5. Persiste com status 'verificado' (têm url de fonte)</span>
+  <span class="k">await</span> db.sinais.upsert(empresa.id, novos);
+
+  <span class="c">// 6. Agente 4 (score) + Agente 5 (abordagem) via LLM</span>
+  <span class="k">const</span> intel = <span class="k">await</span> llm.analisar(empresa, novos);   <span class="c">// score + intenção</span>
+  <span class="k">const</span> abordagem = <span class="k">await</span> llm.estrategia(empresa, novos, intel);
+  <span class="k">await</span> db.empresas.update(empresa.id, { score: intel.score, ...abordagem });
+
+  <span class="k">await</span> rastreio.incrementar();  <span class="c">// alimenta o medidor de progresso</span>
+}</pre>
+      <div class="callout info"><span class="ic">◆</span><div>Agende o Agente 6 (priorizador) como <strong>cron diário</strong> (ex.: 6h) para montar o ranking sem o usuário pedir — entregando o "quem abordar hoje" automaticamente.</div></div>
+    </section>
+
+    <section id="veracidade">
+      <h2><span class="n">09</span> Veracidade &amp; verificação</h2>
+      <ul>
+        <li><strong>Toda</strong> linha em <code>sinais</code> exige <code>url</code> para virar <code>verificado</code>. Sem URL → fica <code>a_verificar</code> (ex.: inferência de IA sem citação).</li>
+        <li>Guarde <code>capturado_em</code> e a <strong>resposta bruta</strong> da fonte (em um bucket/JSON) para auditoria e reprocessamento.</li>
+        <li><code>hash</code> único evita o mesmo sinal entrar duas vezes em rastreios seguidos.</li>
+        <li>Use a <strong>data da fonte</strong> (publicação da notícia / data da vaga) para descartar sinal velho e calcular recência na relevância.</li>
+        <li>Quando usar <strong>Claude Web Search</strong>, persista as <strong>citações</strong> retornadas (cada uma já vem com URL) como a fonte do sinal.</li>
+      </ul>
+    </section>
+
+    <section id="seg">
+      <h2><span class="n">10</span> Segurança &amp; LGPD</h2>
+      <ul>
+        <li><strong>Chaves de API só no servidor</strong> (variáveis de ambiente / secret manager). Nunca no frontend.</li>
+        <li><strong>LGPD:</strong> os contatos (nome, e-mail, telefone) são <strong>dados pessoais</strong>. Defina base legal (legítimo interesse para prospecção B2B), permita exclusão, e registre origem do dado.</li>
+        <li><strong>Termos de uso das fontes:</strong> respeite ToS e <code>robots.txt</code>. Para LinkedIn, use provedores autorizados — não faça scraping direto.</li>
+        <li><strong>Rate-limit &amp; cache:</strong> respeite limites por fonte; cacheie cadastral (muda pouco) por dias, notícias/vagas por horas.</li>
+        <li>Autenticação do app (login por usuário/equipe) + escopo de dados por organização.</li>
+      </ul>
+    </section>
+
+    <section id="custos">
+      <h2><span class="n">11</span> Custos estimados (ordem de grandeza)</h2>
+      <table>
+        <thead><tr><th>Item</th><th>Faixa típica</th><th>Observação</th></tr></thead>
+        <tbody>
+          <tr><td class="api">Dados cadastrais (CNPJ)</td><td>grátis – R$ baixo</td><td>BrasilAPI grátis; CNPJá/ReceitaWS por volume</td></tr>
+          <tr><td class="api">Notícias</td><td>US$ 0–50/mês</td><td>GNews/NewsAPI no início</td></tr>
+          <tr><td class="api">Vagas/Busca (SerpAPI)</td><td>US$ 50–130/mês</td><td>por volume de buscas</td></tr>
+          <tr><td class="api">LinkedIn (Proxycurl)</td><td>US$ 50–300+/mês</td><td>por créditos/consultas</td></tr>
+          <tr><td class="api">IA (Claude)</td><td>US$ ~ por uso</td><td>Haiku barato; Web Search por consulta</td></tr>
+          <tr><td class="api">Hospedagem + banco</td><td>US$ 20–100/mês</td><td>Render/Railway/Fly + Postgres</td></tr>
+        </tbody>
+      </table>
+      <p class="lead" style="margin-top:6px">Valores indicativos para um piloto; variam com volume de contas e frequência de rastreio. Confirme nos sites das APIs.</p>
+    </section>
+
+    <section id="roadmap">
+      <h2><span class="n">12</span> Roadmap de implementação</h2>
+      <div class="grid2">
+        <div class="card"><h3 style="margin-top:0">Fase 1 — Fundação (MVP)</h3><ul><li>Backend + Postgres + auth</li><li>Importação real da planilha (já existe no front)</li><li>Agente 1: resolver CNPJ + cadastral (BrasilAPI/CNPJá)</li><li>Agente 4/5 com Claude</li><li>Contrato REST das seções 7</li></ul></div>
+        <div class="card"><h3 style="margin-top:0">Fase 2 — Sinais reais</h3><ul><li>Notícias (GNews) + Vagas (SerpAPI)</li><li>Worker assíncrono + medidor por SSE</li><li>Dedupe + relevância + status verificado</li><li>Validação humana persistida</li></ul></div>
+        <div class="card"><h3 style="margin-top:0">Fase 3 — LinkedIn &amp; automação</h3><ul><li>Proxycurl (executivos/contratações)</li><li>Cron diário (Agente 6) + alertas</li><li>Claude Web Search como reforço</li></ul></div>
+        <div class="card"><h3 style="margin-top:0">Fase 4 — Escala</h3><ul><li>Enriquecimento (Clearbit/Apollo)</li><li>Integração CRM (Bitrix/HubSpot)</li><li>Multiusuário/equipe + relatórios</li></ul></div>
+      </div>
+    </section>
+
+    <section id="stack">
+      <h2><span class="n">13</span> Stack sugerida</h2>
+      <div class="grid2">
+        <div class="kv"><div class="k">Backend</div><div class="v">Node.js (NestJS/Express) ou Python (FastAPI)</div></div>
+        <div class="kv"><div class="k">Banco</div><div class="v">PostgreSQL + Redis (cache/fila)</div></div>
+        <div class="kv"><div class="k">Fila/Workers</div><div class="v">BullMQ (Node) ou Celery (Python)</div></div>
+        <div class="kv"><div class="k">Agendamento</div><div class="v">Cron / job scheduler (Agente 6)</div></div>
+        <div class="kv"><div class="k">Tempo real</div><div class="v">SSE ou WebSocket (medidor de progresso)</div></div>
+        <div class="kv"><div class="k">Hospedagem</div><div class="v">Render / Railway / Fly.io / AWS</div></div>
+      </div>
+      <p style="margin-top:14px">O frontend atual (este protótipo) pode ser mantido praticamente como está — basta trocar as chamadas internas em memória pelas chamadas REST da seção 7. A estrutura de dados do app (objeto <code>empresa</code> com <code>sinais</code>, <code>memoria</code>, <code>estrategia</code>, <code>proveniencia</code>, <code>validacao</code>) já foi desenhada para espelhar este modelo.</p>
+    </section>
+
+    <section id="riscos">
+      <h2><span class="n">14</span> Riscos &amp; limitações</h2>
+      <ul>
+        <li><strong>LinkedIn:</strong> a fonte mais valiosa é a mais restrita. Dependa de provedores autorizados; custo e cobertura variam.</li>
+        <li><strong>Boards BR (Gupy/Catho):</strong> sem API oficial — use agregador (Google Jobs) para não violar ToS.</li>
+        <li><strong>Falsos positivos:</strong> homônimos de empresa geram sinal errado. Por isso o CNPJ (chave única) e o desambiguador (site/LinkedIn) já existentes no app são essenciais.</li>
+        <li><strong>Custo cresce com volume:</strong> 67 contas × várias fontes × frequência. Cacheie e priorize (rastreie diariamente só as contas quentes).</li>
+        <li><strong>Bing Search descontinuação:</strong> não construa dependência crítica nela.</li>
+        <li><strong>LGPD:</strong> tratar dados de contato exige política clara de privacidade e base legal.</li>
+      </ul>
+      <div class="callout ok"><span class="ic">✓</span><div><strong>Recomendação de partida:</strong> Fase 1 + Fase 2 já entregam um Radar com sinais <em>verificados</em> de <strong>cadastral + notícias + vagas</strong> (as fontes mais baratas e confiáveis), com a IA do Claude fazendo intenção e abordagem. LinkedIn entra na Fase 3 quando o ROI justificar.</div></div>
+    </section>
+
+    <footer>
+      Documento técnico gerado para o projeto Radar Comercial (VendaMais). Os nomes, links e faixas de preço de APIs de terceiros são indicativos — confirme termos, limites e custos atuais diretamente nos sites oficiais antes de contratar.
+    </footer>
+  </main>
+</div>
+</body>
+</html>
