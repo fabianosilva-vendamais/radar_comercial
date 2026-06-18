@@ -1,33 +1,10 @@
 {
-  "builds": [
-    {
-      "src": "public/index.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "radar/**/*.jsx",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "radar/**/*.css",
-      "use": "@vercel/static"
-    }
-  ],
+  "buildCommand": "echo 'No build needed for static site'",
+  "outputDirectory": ".",
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/",
       "destination": "/public/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/public/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600"
-        }
-      ]
     }
   ]
 }
