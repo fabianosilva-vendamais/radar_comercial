@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Radar Comercial - Plataforma estratégica de análise e monitoramento comercial para a VendaMais">
+    <meta name="theme-color" content="#EA5333">
+    <title>Radar Comercial - VendaMais</title>
+    <link rel="stylesheet" href="../radar/styles.css">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <!-- UI Utilities -->
+    <script src="../radar/ui.jsx"></script>
+    
+    <!-- Views Extra -->
+    <script src="../radar/views-extra.jsx"></script>
+    
+    <!-- Data Management -->
+    <script src="../radar/data.js"></script>
+    <script src="../radar/seed-data.js"></script>
+    
+    <!-- Parsers and Utilities -->
+    <script src="../radar/xlsx-parse.js"></script>
+    
+    <!-- Views Components -->
+    <script src="../radar/empresa-view.jsx"></script>
+    <script src="../radar/radar-view.jsx"></script>
+    
+    <!-- Feature Modules -->
+    <script src="../radar/import-flow.jsx"></script>
+    <script src="../radar/export-doc.jsx"></script>
+    <script src="../radar/tweaks-panel.jsx"></script>
+    
+    <!-- Actions and Logic -->
+    <script src="../radar/actions.jsx"></script>
+    
+    <!-- Main Application -->
+    <script src="../radar/app.jsx"></script>
+    
+    <script>
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(RadarApp));
+    </script>
+</body>
+</html>
