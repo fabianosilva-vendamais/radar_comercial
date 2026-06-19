@@ -1,6 +1,11 @@
 {
   "buildCommand": "mkdir -p dist && cp public/index.html dist/index.html && cp -r radar dist/ && cp -r uploads dist/ && cp -r docs dist/ && cp -r screenshots dist/",
   "outputDirectory": "dist",
+  "functions": {
+    "api/chat.js": {
+      "maxDuration": 60
+    }
+  },
   "rewrites": [
     {
       "source": "/",

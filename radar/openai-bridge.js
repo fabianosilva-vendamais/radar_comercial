@@ -3,7 +3,7 @@
  * A chave OPENAI_API_KEY fica no servidor (variável de ambiente Vercel).
  */
 (function () {
-  var OPENAI_MODEL = "gpt-4o";
+  var OPENAI_MODEL = "gpt-4o-mini";
 
   window.claude = {
     complete: async function (opts) {
