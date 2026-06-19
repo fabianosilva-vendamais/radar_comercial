@@ -1,0 +1,269 @@
+Projeto Radar Comercial
+Contexto
+Quero criar uma plataforma chamada Radar Comercial.
+O objetivo não é gerar listas de empresas, como fazem Speedio, Econodata, Neoway ou Data Stone.
+O objetivo é identificar o momento ideal para abordar empresas específicas já definidas pelo usuário.
+A plataforma deve responder diariamente uma única pergunta:
+"Quais empresas merecem minha atenção hoje e qual a melhor forma de abordá-las?"
+A solução deve combinar:
+• Monitoramento de sinais públicos
+• Histórico de relacionamento
+• Inteligência artificial
+• Priorização comercial
+• Sugestão de abordagem
+O sistema deverá funcionar inicialmente com execução manual dos agentes dentro do Claude, mas toda a arquitetura deve ser desenhada para futura automação.
+Visão do produto
+Problema
+Hoje as ferramentas de inteligência comercial ajudam o usuário a encontrar empresas.
+Elas não ajudam o usuário a descobrir:
+• Quem está mais propenso a comprar agora
+• O que mudou na empresa
+• Qual o melhor argumento de abordagem
+• Como aproveitar relacionamentos anteriores
+O Radar Comercial nasce para resolver esse problema.
+Proposta de valor
+Você cadastra as empresas que deseja conquistar.
+O Radar monitora essas empresas continuamente e avisa quando identifica sinais que indiquem potencial momento de compra.
+Além do alerta, o sistema analisa o histórico de relacionamento e sugere a melhor abordagem comercial.
+Conceito central
+O sistema deve combinar três camadas.
+Camada 1
+Monitoramento de mercado.
+Detectar sinais externos.
+Camada 2
+Memória comercial.
+Recuperar tudo o que já aconteceu com aquela empresa.
+Camada 3
+Inteligência comercial.
+Transformar sinais e histórico em ação prática.
+Estrutura de agentes
+A arquitetura deve ser baseada em agentes especializados.
+Cada agente possui função única.
+Agente 1 - Cadastro e enriquecimento
+Objetivo
+Criar uma ficha completa da empresa monitorada.
+Entradas
+• Nome da empresa
+• Site
+• CNPJ
+• LinkedIn
+• Cidade
+• Estado
+• Segmento
+• Porte
+• Contatos conhecidos
+Responsabilidades
+• Padronizar dados
+• Identificar informações faltantes
+• Enriquecer informações públicas
+• Organizar os registros
+Saída
+Ficha estruturada da empresa.
+Agente 2 - Memória comercial
+Objetivo
+Consolidar tudo o que já sabemos sobre a empresa.
+Entradas
+• CRM
+• Propostas
+• E-mails
+• Anotações
+• Reuniões
+• Histórico de clientes
+• Arquivos
+• Planilhas
+• Relatórios
+Responsabilidades
+Responder:
+• Já foi cliente?
+• Já recebeu proposta?
+• Quem participou das negociações?
+• Qual foi o motivo da perda?
+• Qual era a dor?
+• Quem é o principal relacionamento?
+• Quais objeções já apareceram?
+• Existe algum risco político?
+• Existe algum patrocinador interno?
+Saída
+Resumo executivo da conta.
+Exemplo:
+"A empresa recebeu proposta de treinamento em 2024. O projeto não avançou por restrição orçamentária. O diretor comercial participou da negociação. A principal dor era baixa padronização da equipe de vendas."
+Agente 3 - Radar externo
+Objetivo
+Monitorar continuamente sinais externos relevantes.
+Observação importante
+Inicialmente este agente será executado manualmente pelo usuário dentro do Claude.
+No futuro poderá ser automatizado.
+O projeto deve ser desenhado pensando nessa evolução.
+Fontes monitoradas
+Vagas
+• LinkedIn Jobs
+• Indeed
+• Catho
+• Gupy
+• InfoJobs
+• Trabalhe Conosco
+Notícias
+• Google News
+• Portais setoriais
+• Releases
+Sites
+• Novos produtos
+• Novas unidades
+• Novos serviços
+• Mudanças relevantes
+Dados empresariais
+• Novas filiais
+• Alterações cadastrais
+• Capital social
+• Mudanças societárias
+LinkedIn
+• Novos executivos
+• Crescimento do time
+• Contratações
+• Mudanças organizacionais
+Sinais monitorados
+Expansão
+• Abertura de filial
+• Novas unidades
+• Crescimento geográfico
+Crescimento comercial
+• Contratação de SDR
+• Contratação de vendedores
+• Contratação de gerente comercial
+• Contratação de diretor comercial
+Investimento
+• Rodadas
+• Aportes
+• Fusões
+• Aquisições
+Novos produtos
+• Lançamentos
+• Novas linhas
+• Novos mercados
+Movimentações estratégicas
+• Premiações
+• Grandes contratos
+• Expansões internacionais
+Saída obrigatória
+Tabela estruturada.
+Empresa
+Sinal
+Fonte
+Data
+Link
+Relevância
+Resumo
+Nenhum comentário interpretativo.
+Somente fatos.
+Agente 4 - Inteligência de intenção
+Objetivo
+Interpretar os sinais encontrados.
+Receber informações do agente 3.
+Transformar sinais em contexto comercial.
+Responsabilidades
+Avaliar:
+• O que mudou
+• Por que mudou
+• O que isso pode indicar
+• Qual oportunidade existe
+Score de intenção
+Criar uma nota de 0 a 100.
+Faixas
+0 a 30Baixa prioridade
+31 a 60Monitorar
+61 a 80Boa oportunidade
+81 a 100Abordagem prioritária
+Exemplo
+Entrada:
+"Empresa contratou 4 SDRs e 1 gerente comercial."
+Saída:
+"A empresa parece estar estruturando ou ampliando sua operação comercial, indicando potencial demanda por treinamento, gestão comercial, processos e aceleração de vendas."
+Agente 5 - Estratégia de abordagem
+Objetivo
+Transformar oportunidade em ação.
+Receber:
+• Dados da empresa
+• Histórico da conta
+• Sinais encontrados
+• Score
+Responsabilidades
+Determinar:
+• Quem abordar
+• Como abordar
+• Qual argumento utilizar
+• Qual dor conectar
+• Qual solução sugerir
+Entregáveis
+Motivo do alerta
+Contexto
+Melhor ângulo de abordagem
+Canal recomendado
+• WhatsApp
+• E-mail
+• LinkedIn
+• Ligação
+Mensagem sugerida
+Perguntas consultivas
+Próximo passo recomendado
+Agente 6 - Priorizador diário
+Objetivo
+Organizar a agenda do vendedor.
+Receber todas as contas monitoradas.
+Gerar um ranking.
+Saída
+Tabela diária.
+Ranking
+Empresa
+Score
+Motivo
+Ordenar do maior para o menor score.
+O objetivo é responder:
+"Quem devo abordar hoje?"
+Fluxo operacional
+Etapa 1
+Cadastrar empresas.
+Etapa 2
+Registrar histórico.
+Etapa 3
+Executar Agente 3 manualmente.
+Etapa 4
+Enviar saída para Agente 4.
+Etapa 5
+Enviar saída para Agente 5.
+Etapa 6
+Executar Agente 6.
+Etapa 7
+Receber lista priorizada.
+Diferencial competitivo
+O Radar Comercial não vende dados.
+O Radar Comercial vende contexto.
+Concorrentes entregam:
+• Empresas
+• Contatos
+O Radar entrega:
+• Empresa certa
+• Momento certo
+• Motivo certo
+• Mensagem certa
+• Próxima ação certa
+Diferencial exclusivo
+O principal ativo do sistema não será o monitoramento.
+O principal ativo será a combinação de:
+• Histórico comercial
+• Sinais externos
+• Metodologia comercial
+• Inteligência artificial
+A mesma informação pode gerar abordagens completamente diferentes dependendo do histórico daquela conta.
+Por isso a memória comercial é tão importante quanto o monitoramento.
+Solicitação ao Claude
+Com base neste projeto:
+• Estruture a arquitetura completa da solução.
+• Defina a melhor tecnologia para cada agente.
+• Crie o modelo de dados.
+• Crie os prompts completos de cada agente.
+• Crie o fluxo operacional detalhado.
+• Crie a arquitetura para futura automação.
+• Crie o roadmap técnico de desenvolvimento.
+• Identifique riscos e limitações.
+• Sugira melhorias e funcionalidades adicionais.
+• Proponha a versão mais disruptiva possível do Radar Comercial para o mercado brasileiro.
