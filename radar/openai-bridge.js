@@ -7,7 +7,7 @@
  * Para deploy público, substitua por um backend proxy.
  */
 (function () {
-  var OPENAI_API_KEY = "CHAVE_REMOVIDA";
+  var OPENAI_API_KEY = window.__OPENAI_API_KEY__ || "";
   var OPENAI_MODEL   = "gpt-4o"; // gpt-5.5 não existe; gpt-4o é o modelo recomendado
 
   window.claude = {
