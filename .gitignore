@@ -3,3 +3,19 @@
 .env*.local
 .thumbnail
 dist/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+.DS_Store
+
+# Banco de dev (não versionar)
+*.db
+
+# Docs internos (custos/estratégia) — não publicar no deploy
+docs/apis-pagas-pendentes.md
+docs/APIs Pagas Pendentes - Radar Comercial.pdf
+Radar Comercial — Handoff Técnico de Integração de APIs.pdf

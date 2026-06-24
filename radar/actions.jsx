@@ -73,8 +73,8 @@ async function runAgent3IA(e) {
     }
     if (!data.investigar || !data.investigar.length) data.investigar = localSuggestions(e).investigar;
     return { data, viaIA: true };
-  } catch (_) {
-    return { data: localSuggestions(e), viaIA: false };
+  } catch (err) {
+    return { data: localSuggestions(e), viaIA: false, erro: String(err) };
   }
 }
 
@@ -113,24 +113,28 @@ function ScanModal({ empresaId }) {
   const app = useApp();
   const alvos = empresaId ? app.empresas.filter(e => e.id === empresaId) : app.empresas;
   const fontes = [
-    { nome: "Vagas", det: "LinkedIn, Indeed, Gupy, Catho", ic: Icon.briefcase },
-    { nome: "Notícias", det: "Google News e portais setoriais", ic: Icon.signal },
+    { nome: "Dados empresariais", det: "BrasilAPI / Receita Federal (CNPJ)", ic: Icon.buildings },
+    { nome: "Notícias", det: "GNews — portais PT/BR verificados", ic: Icon.signal },
+    { nome: "IA (OpenAI)", det: "Score + estratégia de reabordagem", ic: Icon.sparkles },
     { nome: "LinkedIn", det: "Executivos e contratações", ic: Icon.linkedin },
-    { nome: "Dados empresariais", det: "CNPJ, filiais, capital social", ic: Icon.buildings },
-    { nome: "Sites e releases", det: "Novos produtos e mudanças", ic: Icon.globe },
+    { nome: "Vagas", det: "Google Jobs, Indeed, Gupy", ic: Icon.briefcase },
   ];
   const total = alvos.length;
   const [proc, setProc] = React.useState(0);
+  const [displayTotal, setDisplayTotal] = React.useState(total);
   const [active, setActive] = React.useState(0);
   const [done, setDone] = React.useState(false);
   const [sugeridos, setSugeridos] = React.useState(0);
   const [viaIA, setViaIA] = React.useState(0);
   const [erros, setErros] = React.useState(0);
   const [ultima, setUltima] = React.useState("");
+  const [erroIA, setErroIA] = React.useState("");
+  const [modo, setModo] = React.useState(""); // "backend" | "frontend"
   const cancel = React.useRef(false);
   const started = React.useRef(false);
+  const pollRef = React.useRef(null);
 
-  const pct = done ? 100 : total ? Math.min(99, Math.round(((proc + 0.4) / total) * 100)) : 0;
+  const pct = done ? 100 : displayTotal ? Math.min(99, Math.round(((proc + 0.4) / displayTotal) * 100)) : 0;
 
   // animação das fontes (visual)
   React.useEffect(() => {
@@ -139,16 +143,62 @@ function ScanModal({ empresaId }) {
     return () => clearInterval(t);
   }, [done]);
 
-  // processamento real (IA por conta)
+  // limpa o polling ao desmontar o componente
+  React.useEffect(() => {
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, []);
+
+  // processamento principal — tenta backend, cai em frontend se falhar
   React.useEffect(() => {
     if (started.current) return; started.current = true;
-    (async () => {
+
+    async function rodarBackend() {
+      const body = { escopo: empresaId ? "empresa" : "todas" };
+      if (empresaId) body.empresa_id = empresaId;
+      const resp = await fetch("/api/rastreios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!resp.ok) throw new Error("backend indisponível");
+      const job = await resp.json();
+      setModo("backend");
+
+      pollRef.current = setInterval(async () => {
+        if (cancel.current) { clearInterval(pollRef.current); setDone(true); return; }
+        try {
+          const r = await fetch("/api/rastreios/" + job.id);
+          const rastreio = await r.json();
+          if (rastreio.total) setDisplayTotal(rastreio.total);
+          if (rastreio.processadas != null) { setProc(rastreio.processadas); setViaIA(rastreio.processadas); }
+          if (rastreio.status === "concluido") {
+            clearInterval(pollRef.current);
+            try {
+              const er = await fetch("/api/empresas?per_page=200");
+              const ed = await er.json();
+              (ed.items || []).forEach(emp => app.addEmpresa(emp));
+              setSugeridos((ed.items || []).reduce((n, e) => n + ((e.sinais || []).filter(s => s.status === "verificado").length), 0));
+            } catch (_) {}
+            setDone(true);
+          } else if (rastreio.status === "erro") {
+            clearInterval(pollRef.current);
+            setErroIA(rastreio.erro_msg || "Erro no worker");
+            setErros(1);
+            setDone(true);
+          }
+        } catch (_) {}
+      }, 2000);
+    }
+
+    async function rodarFrontend() {
+      setModo("frontend");
       let sug = 0, ia = 0, err = 0;
       for (let i = 0; i < alvos.length; i++) {
         if (cancel.current) break;
         try {
           const r = await runAgent3IA(alvos[i]);
           if (r.viaIA) ia++;
+          else if (r.erro) setErroIA(r.erro);
           const d = r.data;
           const sinais = (d.investigar || []).slice(0, 5).map(x => ({
             tipo: "A investigar (IA)", titulo: x.titulo || "Sinal a confirmar",
@@ -180,9 +230,15 @@ function ScanModal({ empresaId }) {
         if (!cancel.current) { setProc(i + 1); setSugeridos(sug); setViaIA(ia); setErros(err); }
       }
       if (!cancel.current) setDone(true);
-    })();
+    }
+
+    // tenta backend primeiro; se falhar (servidor off) cai no modo frontend
+    rodarBackend().catch(() => rodarFrontend());
     return () => { cancel.current = true; };
   }, []);
+
+  const modoLabel = modo === "backend" ? "BrasilAPI + GNews + OpenAI" : "IA (OpenAI)";
+  const sinaislLabel = modo === "backend" ? "Sinais verificados" : "Sinais a confirmar";
 
   return (
     <div className="overlay" onClick={(e) => { if (e.target.classList.contains("overlay") && done) app.closeModal(); }}>
@@ -190,8 +246,8 @@ function ScanModal({ empresaId }) {
         <div className="modal-head">
           <span className="ic" style={{ color: "var(--accent)" }}><Icon.radar /></span>
           <div>
-            <h2>{done ? "Rastreio concluído" : "Rastreando com IA"}</h2>
-            <div className="sub">{empresaId ? alvos[0]?.nome : total + " contas"} · Agente 3 → Inteligência (IA)</div>
+            <h2>{done ? "Rastreio concluído" : modo === "backend" ? "Rastreando com APIs + IA" : "Rastreando com IA"}</h2>
+            <div className="sub">{empresaId ? alvos[0]?.nome : total + " contas"} · Agente 3 → {modoLabel}</div>
           </div>
           {done && <span className="x" onClick={app.closeModal}><Icon.x /></span>}
         </div>
@@ -199,9 +255,9 @@ function ScanModal({ empresaId }) {
           <div className="scan-hero">
             <ScanMeter pct={pct} done={done} />
             <div className="scan-stats">
-              <div className="ss"><div className="ss-n" style={{ color: "var(--accent)" }}>{proc}/{total}</div><div className="ss-l">Contas analisadas</div></div>
-              <div className="ss"><div className="ss-n">{sugeridos}</div><div className="ss-l">Sinais a confirmar</div></div>
-              <div className="ss"><div className="ss-n">{viaIA}</div><div className="ss-l">Via IA (OpenAI)</div></div>
+              <div className="ss"><div className="ss-n" style={{ color: "var(--accent)" }}>{proc}/{displayTotal}</div><div className="ss-l">Contas analisadas</div></div>
+              <div className="ss"><div className="ss-n">{sugeridos}</div><div className="ss-l">{sinaislLabel}</div></div>
+              <div className="ss"><div className="ss-n">{viaIA}</div><div className="ss-l">Via OpenAI</div></div>
             </div>
           </div>
 
@@ -228,8 +284,17 @@ function ScanModal({ empresaId }) {
           <div className="ex-note" style={{ marginTop: 16 }}>
             <span className="ic"><Icon.sparkles /></span>
             {done
-              ? <div><b>Inteligência gerada para {proc} conta{proc > 1 ? "s" : ""}</b> ({viaIA} via IA OpenAI{erros ? ", " + erros + " com falha" : ""}). Os sinais entram como <b>"A investigar"</b> com a busca pronta — abra cada um e confirme na fonte antes de abordar. <i>Nada é apresentado como fato confirmado.</i></div>
-              : <div>A IA analisa cada conta e devolve a leitura comercial + as <b>buscas a fazer</b> para confirmar sinais reais. Varredura ao vivo da web exige backend com APIs de busca (não roda 100% no navegador), então aqui os sinais vêm como <b>"a verificar"</b>.</div>}
+              ? <div>
+                  {modo === "backend"
+                    ? <React.Fragment><b>Rastreio real concluído para {proc} conta{proc !== 1 ? "s" : ""}.</b> Sinais com fonte + URL entram como <b>"verificado"</b> — prontos para abordar. Score e estratégia atualizados pelo OpenAI{erros ? ` (${erros} com falha)` : ""}.</React.Fragment>
+                    : <React.Fragment><b>Inteligência gerada para {proc} conta{proc > 1 ? "s" : ""}</b> ({viaIA} via IA OpenAI{erros ? ", " + erros + " com falha" : ""}). Os sinais entram como <b>"A investigar"</b> — confirme na fonte antes de abordar.</React.Fragment>}
+                  {erroIA && <div style={{ marginTop: 8, color: "#EA5333", fontSize: 12 }}><b>Erro:</b> {erroIA}</div>}
+                </div>
+              : <div>
+                  {modo === "backend"
+                    ? <React.Fragment>Worker rodando no servidor: <b>BrasilAPI</b> (dados cadastrais) + <b>GNews</b> (notícias PT/BR) + <b>OpenAI</b> (score + estratégia). Sinais com fonte real entram como <b>"verificado"</b>.</React.Fragment>
+                    : <React.Fragment>A IA analisa cada conta e devolve a leitura comercial + as <b>buscas a fazer</b>. Sinais vêm como <b>"a verificar"</b> — o servidor Flask com GNEWS_API_KEY não foi detectado.</React.Fragment>}
+                </div>}
           </div>
         </div>
         <div className="modal-foot">
@@ -240,8 +305,10 @@ function ScanModal({ empresaId }) {
             </React.Fragment>
           ) : (
             <React.Fragment>
-              <span className="mono" style={{ fontSize: 12, color: "var(--tx-2)", marginRight: "auto" }}>Consultando inteligência…</span>
-              <button className="btn ghost" onClick={() => { cancel.current = true; setDone(true); }}>Parar</button>
+              <span className="mono" style={{ fontSize: 12, color: "var(--tx-2)", marginRight: "auto" }}>
+                {modo === "backend" ? "Worker ativo — atualizando a cada 2s…" : "Consultando inteligência…"}
+              </span>
+              <button className="btn ghost" onClick={() => { cancel.current = true; if (pollRef.current) clearInterval(pollRef.current); setDone(true); }}>Parar</button>
             </React.Fragment>
           )}
         </div>

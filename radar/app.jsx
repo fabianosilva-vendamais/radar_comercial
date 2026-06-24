@@ -258,6 +258,7 @@ function App() {
     removerEmpresa(id) {
       setEmpresas(list => list.filter(e => e.id !== id));
       if (empresaId === id) { setView(prevView || "radar"); setEmpresaId(null); }
+      fetch("/api/empresas/" + id, { method: "DELETE" }).catch(() => {});
     },
     removerDemos() {
       let n = 0;
