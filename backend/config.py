@@ -32,8 +32,14 @@ class ProductionConfig(Config):
     @classmethod
     def fix_db_url(cls):
         url = cls.SQLALCHEMY_DATABASE_URI or ""
+        # Normaliza prefixo legado (postgres:// -> postgresql://)
         if url.startswith("postgres://"):
-            cls.SQLALCHEMY_DATABASE_URI = url.replace("postgres://", "postgresql://", 1)
+            url = url.replace("postgres://", "postgresql://", 1)
+        # Força o driver psycopg3 (instalado no requirements); sem isto o
+        # SQLAlchemy tentaria o psycopg2 e falharia ao conectar.
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+psycopg://", 1)
+        cls.SQLALCHEMY_DATABASE_URI = url
 
 
 CONFIG_MAP = {
