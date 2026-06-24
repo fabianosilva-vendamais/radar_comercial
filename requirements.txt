@@ -7,5 +7,4 @@ openai>=2.0.0
 gunicorn==22.0.0
 dukpy==0.3.1
 requests>=2.32.0
-# Para PostgreSQL em produção, adicione:
-# psycopg[binary]>=3.1  (psycopg3, suporta Python 3.12+)
+psycopg[binary]>=3.1
