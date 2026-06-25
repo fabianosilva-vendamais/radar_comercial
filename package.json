@@ -1,29 +1,7 @@
 {
-  "name": "radar-comercial",
+  "name": "radar-aeo-geo-vendamais",
   "version": "1.0.0",
-  "description": "Plataforma estratégica de análise e monitoramento comercial para a VendaMais",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "start": "node server.js"
-  },
-  "keywords": [
-    "radar",
-    "comercial",
-    "vendamais"
-  ],
-  "author": "Fabiano Silva",
-  "license": "MIT",
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "xlsx": "^0.18.5"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^4.0.0",
-    "vite": "^4.3.9"
-  }
+  "private": true,
+  "description": "Radar AEO/GEO VendaMais — inteligência de presença em respostas de IA, foco mensal de whale hunting e recomendações de conteúdo.",
+  "license": "UNLICENSED"
 }
